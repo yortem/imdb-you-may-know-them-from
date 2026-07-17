@@ -10,7 +10,7 @@ A Chrome extension that adds the "You Know Them From" section (like the one in t
 
 1. Visit any actor/actress page on IMDB (e.g. `/name/nm0002084/`)
 2. IMDB already knows which titles you've rated and embeds your rating (`ipc-rating-star--currentUser`) right in the filmography
-3. The extension automatically expands all collapsed accordion sections (like "Previous") and clicks any "See all" buttons to ensure all credits are loaded, then scans the page for credits with your ratings and builds a **"You Know Them From"** section at the top
+3. The extension automatically expands each collapsed accordion section (e.g. "Actor", "Previous", "Self", etc.) and clicks any "See all" buttons so every credit is loaded, then scans the page for titles you've rated and builds a **"You Know Them From"** section at the top
 
 No configuration needed. No external requests. Just works if you're logged into IMDB.
 

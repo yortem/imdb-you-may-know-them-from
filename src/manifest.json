@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "IMDB You May Know Them From",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "On an actor's IMDB page, shows which movies/shows you've rated that they appear in.",
   "host_permissions": [
     "*://*.imdb.com/*"
