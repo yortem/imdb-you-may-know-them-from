@@ -18,7 +18,9 @@ No configuration needed. No external requests. Just works if you're logged into 
 
 [![Available in the Chrome Web Store](chrome-web-store-badge.png)](https://chromewebstore.google.com/detail/aabhdkgmjdkpkfegbpebgienpemehmlc)
 
-Or install from source:
+Or [download the latest release](https://github.com/yortem/imdb-you-may-know-them-from/releases) and load the unpacked extension.
+
+To install from source:
 
 1. Open `chrome://extensions`
 2. Enable **Developer mode** (toggle top-right)
