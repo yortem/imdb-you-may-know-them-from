@@ -16,6 +16,10 @@ No configuration needed. No external requests. Just works if you're logged into 
 
 ## Installation
 
+[![Available in the Chrome Web Store](chrome-web-store-badge.png)](https://chromewebstore.google.com/detail/aabhdkgmjdkpkfegbpebgienpemehmlc)
+
+Or install from source:
+
 1. Open `chrome://extensions`
 2. Enable **Developer mode** (toggle top-right)
 3. Click **Load unpacked** and select the `src/` folder
