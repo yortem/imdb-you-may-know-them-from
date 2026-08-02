@@ -71,13 +71,21 @@
     return n;
   }
 
-  async function waitForContent() {
-    for (let i = 0; i < 30; i++) {
-      if ($('.ipc-rating-star--currentUser')) return true;
-      await delay(500);
-    }
-    return false;
+  function createContainer() {
+    let section = $('[data-testid="ymktf_section"]');
+    if (section) return section;
+
+    const anchor = findAnchor();
+    if (!anchor) return null;
+
+    section = document.createElement('section');
+    section.className = 'ipc-page-section ipc-page-section--base ymktf-section';
+    section.setAttribute('data-testid', 'ymktf_section');
+    anchor.parentNode.insertBefore(section, anchor.nextSibling);
+    return section;
   }
+
+  // ---- card rendering -----------------------------------------------------
 
   function createCard(item) {
     const card = document.createElement('div');
@@ -105,7 +113,7 @@
 
     const midTop = document.createElement('div');
     midTop.className = 'ipc-primary-image-list-card__content-mid-top';
-    midTop.innerHTML = `<div class="ipc-rating-star-group"><span class="ipc-rating-star ipc-rating-star--base ipc-rating-star--currentUser ipc-rating-star-group--currentUser"><svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" class="ipc-icon ipc-icon--star-inline" viewBox="0 0 24 24" fill="currentColor" role="presentation"><path d="M12 20.1l5.82 3.682c1.066.675 2.37-.322 2.09-1.584l-1.543-6.926 5.146-4.667c.94-.85.435-2.465-.799-2.567l-6.773-.602L13.29.89a1.38 1.38 0 0 0-2.581 0l-2.65 6.53-6.774.602C.052 8.126-.453 9.74.486 10.59l5.147 4.666-1.542 6.926c-.28 1.262 1.023 2.26 2.09 1.585L12 20.099z"></path></svg><span class="ipc-rating-star--rating">${item.rating}</span></span></div>`;
+    midTop.innerHTML = `<div class="ipc-rating-star-group"><span class="ipc-rating-star ipc-rating-star--base ipc-rating-star--currentUser ipc-rating-star-group--currentUser"><svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" class="ipc-icon ipc-icon--star-inline" viewBox="0 0 24 24" fill="currentColor" role="presentation"><path d="M12 20.1l5.82 3.682c1.066.675 2.37-.322 2.09-1.584l-1.543-6.926 5.146-4.667c.94-.85.435-2.465-.799-2.567l-6.773-.602L13.29.89a1.38 1.38 0 0 0-2.581 0l-2.65 6.53-6.774.602C.052 8.126-.453 9.74.486 10.59l5.147 4.662-1.542 6.926c-.28 1.262 1.023 2.26 2.09 1.585L12 20.099z"></path></svg><span class="ipc-rating-star--rating">${item.rating}</span></span></div>`;
 
     const midBot = document.createElement('div');
     midBot.className = 'ipc-primary-image-list-card__content-mid-bottom';
@@ -120,22 +128,50 @@
     content.append(top, midTop, midBot, bot);
     card.append(posterBox, content);
     card.addEventListener('click', () => {
-      window.open(`https://www.imdb.com/title/${item.id}/`, '_blank');
+      location.href = `https://www.imdb.com/title/${item.id}/`;
     });
     card.style.cursor = 'pointer';
     return card;
   }
 
-  function injectSection(items) {
-    const anchor = findAnchor();
-    if (!anchor) return;
+  function buildTitleSection() {
+    return `<div class="ipc-title ipc-title--base ipc-title--section-title ipc-title--on-textPrimary"><h2 class="ipc-title__text"><span>You Know Them From</span><a class="ipc-title-link-wrapper ymktf-repo-link" href="https://github.com/yortem/imdb-you-may-know-them-from" target="_blank" title="yortem/imdb-you-may-know-them-from"><svg width="24" height="24" class="ipc-icon ipc-icon--link ipc-icon--inline ipc-title-link" viewBox="0 0 24 24" fill="currentColor" role="presentation"><path fill="none" d="M0 0h24v24H0V0z"></path><path d="M17 7h-3c-.55 0-1 .45-1 1s.45 1 1 1h3c1.65 0 3 1.35 3 3s-1.35 3-3 3h-3c-.55 0-1 .45-1 1s.45 1 1 1h3c2.76 0 5-2.24 5-5s-2.24-5-5-5zm-9 5c0 .55.45 1 1 1h6c.55 0 1-.45 1-1s-.45-1-1-1H9c-.55 0-1 .45-1 1zm2 3H7c-1.65 0-3-1.35-3-3s1.35-3 3-3h3c.55 0 1-.45 1-1s-.45-1-1-1H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h3c.55 0 1-.45 1-1s-.45-1-1-1z"></path></svg></a></h2></div>`;
+  }
 
-    const section = document.createElement('section');
-    section.className = 'ipc-page-section ipc-page-section--base ymktf-section';
-    section.setAttribute('data-testid', 'ymktf_section');
+  function renderLoading(section) {
+    if (!section) return;
+    section.innerHTML = buildTitleSection();
+    const sub = document.createElement('div');
+    sub.style.cssText = 'color:#787878;font-size:14px;margin:0 0 16px 0;padding:0 20px';
+    sub.textContent = 'Scanning for rated titles…';
+    section.append(sub);
+  }
 
-    const titleHtml = `<div class="ipc-title ipc-title--base ipc-title--section-title ipc-title--on-textPrimary"><h2 class="ipc-title__text"><span id="ymktf_title">You Know Them From</span><a class="ipc-title-link-wrapper ymktf-repo-link" href="https://github.com/yortem/imdb-you-may-know-them-from" target="_blank" title="yortem/imdb-you-may-know-them-from"><svg width="24" height="24" class="ipc-icon ipc-icon--link ipc-icon--inline ipc-title-link" viewBox="0 0 24 24" fill="currentColor" role="presentation"><path fill="none" d="M0 0h24v24H0V0z"></path><path d="M17 7h-3c-.55 0-1 .45-1 1s.45 1 1 1h3c1.65 0 3 1.35 3 3s-1.35 3-3 3h-3c-.55 0-1 .45-1 1s.45 1 1 1h3c2.76 0 5-2.24 5-5s-2.24-5-5-5zm-9 5c0 .55.45 1 1 1h6c.55 0 1-.45 1-1s-.45-1-1-1H9c-.55 0-1 .45-1 1zm2 3H7c-1.65 0-3-1.35-3-3s1.35-3 3-3h3c.55 0 1-.45 1-1s-.45-1-1-1H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h3c.55 0 1-.45 1-1s-.45-1-1-1z"></path></svg></a></h2></div>`;
-    section.innerHTML = titleHtml;
+  function renderEmpty(section) {
+    if (!section) return;
+    section.innerHTML = buildTitleSection();
+    const sub = document.createElement('div');
+    sub.style.cssText = 'margin:0 20px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap';
+    const text = document.createElement('span');
+    text.style.cssText = 'color:#787878;font-size:14px';
+    text.textContent = 'No rated titles were found for this person. If they should appear, the list may not have loaded — you can try scanning again:';
+    const btn = makeRetryButton();
+    btn.textContent = 'Click here if this list didn\'t load';
+    sub.append(text, btn);
+    section.append(sub);
+  }
+
+  function makeRetryButton() {
+    const btn = document.createElement('button');
+    btn.style.cssText =
+      'background:none;border:none;color:#5796ef;text-decoration:underline;cursor:pointer;font-size:13px;padding:0';
+    btn.addEventListener('click', onManualScan);
+    return btn;
+  }
+
+  function renderSection(section, items) {
+    if (!section) return;
+    section.innerHTML = buildTitleSection();
 
     const subtitle = document.createElement('div');
     subtitle.style.cssText =
@@ -184,52 +220,81 @@
       pagination.appendChild(seeMore);
       section.append(pagination);
     }
-
-    anchor.parentNode.insertBefore(section, anchor.nextSibling);
   }
 
-  function injectMessage(body, showOptions) {
-    const anchor = findAnchor();
-    if (!anchor) return;
+  // ---- scanning -----------------------------------------------------------
 
-    const section = document.createElement('section');
-    section.className = 'ipc-page-section ipc-page-section--base ymktf-section';
-    section.innerHTML = `<div class="ipc-title ipc-title--base ipc-title--section-title"><h2 class="ipc-title__text"><span>You Know Them From</span></h2></div>
-      <div style="padding:20px;color:#787878;font-size:14px">${body}</div>`;
-    if (showOptions) {
-      const btn = document.createElement('button');
-      btn.textContent = 'Open Options';
-      btn.style.cssText =
-        'margin:0 20px 20px;padding:8px 24px;background:#f5c518;color:#000;border:none;border-radius:24px;font-weight:600;cursor:pointer;font-size:14px';
-      btn.addEventListener('click', () => chrome.runtime.openOptionsPage());
-      section.append(btn);
+  async function scan() {
+    expandAccordions();
+    const more = clickSeeAllButtons();
+    if (more > 0) await delay(2000);
+    else await delay(800);
+    const first = extractRatedCredits();
+    if (first.length === 0) {
+      // Nothing yet; a few credits load lazily. Wait, then scan once more.
+      await delay(2000);
+      return extractRatedCredits();
     }
-    anchor.parentNode.insertBefore(section, anchor.nextSibling);
-    return section;
+    return first;
+  }
+
+  async function onManualScan() {
+    if (scanning) return;
+    scanning = true;
+    const section = createContainer();
+    renderLoading(section);
+    try {
+      const items = await scan(section);
+      if (items.length > 0) renderSection(section, items);
+      else renderEmpty(section);
+    } catch (e) {
+      renderEmpty(section);
+    }
+    scanning = false;
+  }
+
+  function renderPending(section) {
+    renderLoading(section);
+    const btn = makePendingButton();
+    const sub = document.createElement('div');
+    sub.style.cssText = 'margin:.2em 0 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap';
+    const hint = document.createElement('span');
+    hint.style.cssText = 'color:#787878;font-size:14px';
+    hint.textContent = 'Looking for your rated titles';
+    sub.append(hint, btn);
+    section.append(sub);
+  }
+
+  function makePendingButton() {
+    const btn = makeRetryButton();
+    btn.textContent = "Click here if this list didn't load";
+    btn.id = 'ymktf_pending_btn';
+    return btn;
+  }
+
+  async function build(section) {
+    renderPending(section);
+    try {
+      const items = await scan(section);
+      if (items.length > 0) renderSection(section, items);
+      else renderEmpty(section);
+    } catch (e) {
+      renderEmpty(section);
+    }
   }
 
   async function init() {
     const pathMatch = location.pathname.match(/^\/name\/(nm\d+)\/?/);
     if (!pathMatch) return;
 
-    const anchor = findAnchor();
-    if (!anchor) return;
+    if (!findAnchor()) return;
 
-    const hasRatings = await waitForContent();
-    if (!hasRatings) return;
+    const section = createContainer();
+    if (!section) return;
 
-    expandAccordions();
-    let more = clickSeeAllButtons();
-    if (more > 0) await delay(2000);
-    else await delay(800);
-
-    const items = extractRatedCredits();
-    if (items.length === 0) {
-      injectMessage('No rated titles found for this person. Make sure you\'re logged in to IMDB and have rated some of their work.');
-      return;
-    }
-
-    injectSection(items);
+    // Show the section immediately with a subtle retry button, then scan in the
+    // background. scan() already handles lazy credits with internal delays.
+    await build(section);
   }
 
   if (document.readyState === 'loading') {
