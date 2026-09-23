@@ -11,6 +11,7 @@ A Chrome extension that adds the "You Know Them From" section (like the one in t
 1. Visit any actor/actress page on IMDB (e.g. `/name/nm0002084/`)
 2. IMDB already knows which titles you've rated and embeds your rating (`ipc-rating-star--currentUser`) right in the filmography
 3. The extension automatically expands each collapsed accordion section (e.g. "Actor", "Previous", "Self", etc.) and clicks any "See all" buttons so every credit is loaded, then scans the page for titles you've rated and builds a **"You Know Them From"** section at the top
+4. Each card in the new section has a small Google icon (bottom-right) that opens a Google Images search for `<title> <actor>` in a new tab
 
 No configuration needed. No external requests. Just works if you're logged into IMDB.
 

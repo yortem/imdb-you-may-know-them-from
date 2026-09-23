@@ -2,6 +2,7 @@
   const $ = (sel, ctx) => (ctx || document).querySelector(sel);
   const $$ = (sel, ctx) => Array.from((ctx || document).querySelectorAll(sel));
   const delay = ms => new Promise(r => setTimeout(r, ms));
+  let scanning = false;
 
   function idFromHref(href) {
     const m = href.match(/\/title\/(tt\d+)\//);
@@ -87,7 +88,52 @@
 
   // ---- card rendering -----------------------------------------------------
 
-  function createCard(item) {
+  function getActorName() {
+    const hero =
+      document.querySelector('[data-testid="hero__pageTitle"] span') ||
+      document.querySelector('[data-testid="hero__pageTitle"]') ||
+      document.querySelector('h1 span') ||
+      document.querySelector('h1');
+    if (hero) {
+      const t = (hero.textContent || '').trim();
+      if (t) return t;
+    }
+    const m = (document.title || '').match(/^(.+?)\s*[-–|]\s*IMDb/i);
+    if (m) return m[1].trim();
+    return '';
+  }
+
+  function googleImagesUrl(title, actorName) {
+    const q = `${title || ''} ${actorName || ''}`.trim();
+    return `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(q)}`;
+  }
+
+  function createGoogleButton(item, actorName) {
+    const link = document.createElement('a');
+    link.href = googleImagesUrl(item.title, actorName);
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.title = `Search Google Images: ${`${item.title} ${actorName}`.trim()}`;
+    link.className = 'ymktf-google-btn';
+    link.setAttribute('aria-label', link.title);
+    link.style.cssText =
+      'display:inline-flex;align-items:center;justify-content:center;' +
+      'width:22px;height:22px;border-radius:50%;flex-shrink:0;margin-left:8px;' +
+      'opacity:.85;';
+    link.innerHTML =
+      '<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">' +
+      '<path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z"/>' +
+      '<path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96H1.29v3.09C3.26 21.3 7.31 24 12 24z"/>' +
+      '<path fill="#FBBC05" d="M5.27 14.29c-.25-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.98-3.09z"/>' +
+      '<path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.98 3.09C6.22 6.86 8.87 4.75 12 4.75z"/>' +
+      '</svg>';
+    link.addEventListener('click', e => e.stopPropagation());
+    link.addEventListener('mouseenter', () => { link.style.opacity = '1'; });
+    link.addEventListener('mouseleave', () => { link.style.opacity = '.85'; });
+    return link;
+  }
+
+  function createCard(item, actorName) {
     const card = document.createElement('div');
     card.className =
       'ipc-list-card--span ipc-list-card--border-line ipc-list-card--click ipc-list-card--base ipc-list-card ipc-primary-image-list-card ipc-primary-image-list-card--base ipc-primary-image-list-card--click ipc-primary-image-list-card--media-radius sc-ad2b0d81-0 kLBibl ipc-sub-grid-item ipc-sub-grid-item--span-4 ymktf-card';
@@ -123,7 +169,9 @@
 
     const bot = document.createElement('div');
     bot.className = 'ipc-primary-image-list-card__content-bottom';
+    bot.style.cssText = 'display:flex;justify-content:space-between;align-items:center;';
     bot.innerHTML = `<ul class="ipc-inline-list ipc-inline-list--show-dividers ipc-inline-list--no-wrap ipc-inline-list--inline ipc-primary-image-list-card__title-metadata base" role="presentation"><li role="presentation" class="ipc-inline-list__item ipc-primary-image-list-card__secondary-item"><span class="ipc-primary-image-list-card__secondary-text">${item.year}</span></li></ul>`;
+    bot.appendChild(createGoogleButton(item, actorName));
 
     content.append(top, midTop, midBot, bot);
     card.append(posterBox, content);
@@ -171,6 +219,7 @@
 
   function renderSection(section, items) {
     if (!section) return;
+    const actorName = getActorName();
     section.innerHTML = buildTitleSection();
 
     const subtitle = document.createElement('div');
@@ -189,7 +238,7 @@
     const toShow = showAll ? items : items.slice(0, maxShow);
 
     for (const item of toShow) {
-      grid.appendChild(createCard(item));
+      grid.appendChild(createCard(item, actorName));
     }
 
     section.append(grid);
@@ -212,7 +261,7 @@
       btn.addEventListener('click', () => {
         grid.innerHTML = '';
         for (const item of items) {
-          grid.appendChild(createCard(item));
+          grid.appendChild(createCard(item, actorName));
         }
         pagination.remove();
       });
